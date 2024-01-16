@@ -1,21 +1,48 @@
-from passlib.context import CryptContext
+import time
+import jwt
+from decouple import config
 from models.usuarioModel import UsuarioLoginModel
-print("authService?")
 from repositories.usuarioRepositore import buscar_usuario_por_email
-print("auth")
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-print("authService")
+from utils.AuthUtil import verificar_senha
+
+JWT_SECRET = config("JWT_SECRET")
+
+def gerar_token_jwt(usuario_id: str) -> str:
+    payload ={
+        "usuario_id": usuario_id,
+        "expires": time.time() + 600
+    }
+
+
+    token = jwt.encode(payload, JWT_SECRET, algorithm="HS256" )
+    return token
+def decodificar_token_jwt(token: str):
+    try:
+        token_decodificado = jwt.decode(token, JWT_SECRET, algorithms="HS256")
+        if(token_decodificado["tempo_expiracao"] >= time.time()):
+            return token_decodificado
+        else:
+            return None
+    except Exception as erro:
+        return {
+            "mensagem": "Erro interno no servidor",
+            "dados": str(erro),
+            "status": 500
+        }
+
+
 async def login_service(usuario: UsuarioLoginModel):
     usuario_encontrado = await buscar_usuario_por_email(usuario.email)
 
-    if(not usuario):
+    if(not usuario_encontrado):
         return{
             "mensagem": "email ou senha incorretos",
             "dados": "",
             "status": 401
         }
     else:
-        if( verificar_senha(usuario.senha, usuario_encontrado.senha)):
+        if verificar_senha(usuario.senha, usuario_encontrado['senha']):
+
             return {
                 "mensagem": "Login realizado com sucesso",
                 "dados": usuario_encontrado,
@@ -23,9 +50,6 @@ async def login_service(usuario: UsuarioLoginModel):
             }
         else:
             return {
-                "mensagem": "email ou senha incorretos"
+                "mensagem": "email ou senha incorretos",
+                "status": 500
             }
-def gerar_senha_criptografada(senha):
-    return pwd_context.hash(senha)
-def verificar_senha(senha, senha_criptografada):
-    return pwd_context.verify(senha, senha_criptografada)

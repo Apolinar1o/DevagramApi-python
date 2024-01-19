@@ -18,17 +18,14 @@ def gerar_token_jwt(usuario_id: str) -> str:
     return token
 def decodificar_token_jwt(token: str):
     try:
-        token_decodificado = jwt.decode(token, JWT_SECRET, algorithms="HS256")
-        if(token_decodificado["tempo_expiracao"] >= time.time()):
+        token_decodificado = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+
+        if token_decodificado["expires"] >= time.time():
             return token_decodificado
         else:
             return None
     except Exception as erro:
-        return {
-            "mensagem": "Erro interno no servidor",
-            "dados": str(erro),
-            "status": 500
-        }
+        return None
 
 
 async def login_service(usuario: UsuarioLoginModel):

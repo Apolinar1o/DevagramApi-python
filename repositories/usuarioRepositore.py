@@ -19,7 +19,7 @@ def usuario_helper(usuario):
         "nome": usuario["nome"],
         "email": usuario["email"],
         "senha": usuario["senha"],
-        "foto": usuario["foto"]
+        "foto": usuario["foto"] if "foto" in usuario else ""
     }
 async def criar_usuario(usuario: UsuarioCriarModel) -> dict:
     usuario.senha = gerar_senha_criptografada(usuario.senha)
@@ -40,17 +40,32 @@ async def buscar_usuario_por_email(email: str) -> dict:
     if usuario:
         return usuario_helper(usuario)
 
-async def atualizar_usuario(id: str, dados_usuario):
-    usuario = await usuario_collection.find_one({"id": ObjectId(str(id))})
+async def atualizar_usuario(id: str, dados_usuario: dict) -> dict:
 
-    if( usuario):
-        usuario_atualizado = await usuario_collection.update_one({
-            "_id": ObjectId}, {"$set": dados_usuario
-        })
+    usuario = await usuario_collection.find_one({"_id": ObjectId(str(id))})
 
-        return usuario_helper(usuario_atualizado)
+    if usuario:
+        try:
+            await usuario_collection.update_one(
+                {"_id": ObjectId(id)},
+                {"$set": dados_usuario}
+            )
+
+            usuario_atualizado = await usuario_collection.find_one({"_id": ObjectId(id)})
+
+            return usuario_helper(usuario_atualizado)
+
+        except Exception as error:
+                print(error)
+
 async def deletar_usuario(id: str):
-    usuario = await usuario_collection.find_one({"id": ObjectId(str(id))})
+    usuario = await usuario_collection.find_one({"_id": ObjectId(str(id))})
 
     if( usuario):
-        await usuario_collection.delete_one({"id": ObjectId(str(id))})
+        await usuario_collection.delete_one({"_id": ObjectId(str(id))})
+
+async def buscar_usuario(id: str) -> dict:
+    usuario = await usuario_collection.find_one({"_id": ObjectId(id)})
+
+    if(usuario):
+        return usuario_helper(usuario)

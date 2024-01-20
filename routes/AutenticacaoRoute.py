@@ -1,14 +1,12 @@
 from fastapi import APIRouter, Body, HTTPException
 from models.usuarioModel import  UsuarioLoginModel
 from services.AuthService import login_service, gerar_token_jwt
-from services.UsuarioServices import UsuarioService
+from services.UsuarioServices import registrar_usuario
 
 router = APIRouter()
-usuarioService = UsuarioService()
-print("usuarioService")
+
 @router.post("/login")
 async def login(usuario: UsuarioLoginModel = Body((...))):
-    print("11111111111111111111111111")
     resultado = await login_service(usuario)
 
 

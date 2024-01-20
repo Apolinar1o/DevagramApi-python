@@ -4,7 +4,6 @@ from bson import ObjectId
 from decouple import config
 from models.usuarioModel import UsuarioModel, UsuarioCriarModel
 from utils.AuthUtil import gerar_senha_criptografada
-from utils.ConverterUtil import ConverterUtil
 
 MONGODB_URL=config("MONGODB_URL")
 
@@ -14,55 +13,59 @@ database = client.devagram
 
 usuario_collection = database.get_collection("usuario")
 
+def usuario_helper(usuario):
+    return {
+        "id": str(usuario["_id"]),
+        "nome": usuario["nome"],
+        "email": usuario["email"],
+        "senha": usuario["senha"],
+        "foto": usuario["foto"] if "foto" in usuario else ""
+    }
+async def criar_usuario(usuario: UsuarioCriarModel) -> dict:
+    usuario.senha = gerar_senha_criptografada(usuario.senha)
 
-converterUtil = ConverterUtil()
-class UsuarioRepository:
+    usuario_criado = await usuario_collection.insert_one(usuario.__dict__)
 
-    async def criar_usuario(self, usuario: UsuarioCriarModel) -> dict:
-        usuario.senha = gerar_senha_criptografada(usuario.senha)
+    novo_usuario = await usuario_collection.find_one({"_id": usuario_criado.inserted_id})
 
-        usuario_criado = await usuario_collection.insert_one(usuario.__dict__)
-
-        novo_usuario = await usuario_collection.find_one({"_id": usuario_criado.inserted_id})
-
-        return converterUtil.usuario_converter(novo_usuario)
+    return usuario_helper((novo_usuario))
 
 
-    async def listar_usuarios(self):
-       return usuario_collection.find()
+async def listar_usuarios():
+   return usuario_collection.find()
 
-    async def buscar_usuario_por_email(self, email: str) -> dict:
-        print("buscar?")
-        usuario = await usuario_collection.find_one({"email": email})
-        if usuario:
-            return converterUtil.usuario_converter(usuario)
+async def buscar_usuario_por_email(email: str) -> dict:
+    print("buscar?")
+    usuario = await usuario_collection.find_one({"email": email})
+    if usuario:
+        return usuario_helper(usuario)
 
-    async def atualizar_usuario(self, id: str, dados_usuario: dict) -> dict:
+async def atualizar_usuario(id: str, dados_usuario: dict) -> dict:
 
-        usuario = await usuario_collection.find_one({"_id": ObjectId(str(id))})
+    usuario = await usuario_collection.find_one({"_id": ObjectId(str(id))})
 
-        if usuario:
-            try:
-                await usuario_collection.update_one(
-                    {"_id": ObjectId(id)},
-                    {"$set": dados_usuario}
-                )
+    if usuario:
+        try:
+            await usuario_collection.update_one(
+                {"_id": ObjectId(id)},
+                {"$set": dados_usuario}
+            )
 
-                usuario_atualizado = await usuario_collection.find_one({"_id": ObjectId(id)})
+            usuario_atualizado = await usuario_collection.find_one({"_id": ObjectId(id)})
 
-                return converterUtil.usuario_converter(usuario_atualizado)
+            return usuario_helper(usuario_atualizado)
 
-            except Exception as error:
-                    print(error)
+        except Exception as error:
+                print(error)
 
-    async def deletar_usuario(self, id: str):
-        usuario = await usuario_collection.find_one({"_id": ObjectId(str(id))})
+async def deletar_usuario(id: str):
+    usuario = await usuario_collection.find_one({"_id": ObjectId(str(id))})
 
-        if( usuario):
-            await usuario_collection.delete_one({"_id": ObjectId(str(id))})
+    if( usuario):
+        await usuario_collection.delete_one({"_id": ObjectId(str(id))})
 
-    async def buscar_usuario(self, id: str) -> dict:
-        usuario = await usuario_collection.find_one({"_id": ObjectId(id)})
+async def buscar_usuario(id: str) -> dict:
+    usuario = await usuario_collection.find_one({"_id": ObjectId(id)})
 
-        if(usuario):
-            return converterUtil.usuario_converter(usuario)
+    if(usuario):
+        return usuario_helper(usuario)

@@ -3,7 +3,6 @@ from botocore.exceptions import ClientError
 from decouple import config
 
 class AWSProvider:
-
     def upload_arquivo_s3(self, caminho_para_salvar, caminho_do_arquivo, bucket="devaria-py"):
         s3_client = boto3.client(
             "s3",

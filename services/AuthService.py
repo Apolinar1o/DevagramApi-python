@@ -2,11 +2,11 @@ import time
 import jwt
 from decouple import config
 from models.usuarioModel import UsuarioLoginModel
-from repositories.usuarioRepositore import buscar_usuario_por_email
+from repositories.usuarioRepositore import UsuarioRepository
 from utils.AuthUtil import verificar_senha
 
 JWT_SECRET = config("JWT_SECRET")
-
+usuarioRepository = UsuarioRepository()
 def gerar_token_jwt(usuario_id: str) -> str:
     payload ={
         "usuario_id": usuario_id,
@@ -17,6 +17,7 @@ def gerar_token_jwt(usuario_id: str) -> str:
     token = jwt.encode(payload, JWT_SECRET, algorithm="HS256" )
     return token
 def decodificar_token_jwt(token: str):
+    print("decodificar")
     try:
         token_decodificado = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
 
@@ -29,7 +30,7 @@ def decodificar_token_jwt(token: str):
 
 
 async def login_service(usuario: UsuarioLoginModel):
-    usuario_encontrado = await buscar_usuario_por_email(usuario.email)
+    usuario_encontrado = await usuarioRepository.buscar_usuario_por_email(usuario.email)
 
     if(not usuario_encontrado):
         return{

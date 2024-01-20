@@ -1,27 +1,27 @@
 from datetime import datetime
 import os
-
 from fastapi import APIRouter, Body, HTTPException, Depends, Header, UploadFile
 
 from middleware.JwtMiddleWare import verificar_token
 from models.usuarioModel import UsuarioModel, UsuarioCriarModel
-from services.AuthService import decodificar_token_jwt
-from services.UsuarioServices import (registrar_usuario, buscar_usuario)
+from services.UsuarioServices import UsuarioService
 from services.AuthService import decodificar_token_jwt
 
 
 
 
 router = APIRouter()
+usuarioService = UsuarioService()
 
 @router.post("/", response_description="Rota para criar um novo usuário")
 async def rota_criar_usuario(file: UploadFile,  usuario: UsuarioCriarModel = Depends(UsuarioCriarModel)):
+    print("1111111111111111111111111111111111")
     try:
         caminho_arquivo = f"files/foto-{datetime.now(). strftime("%H%M%S")}.png"
 
         with open(caminho_arquivo, "wb+") as arquivo:
             arquivo.write(file.file.read())
-        resultado = await registrar_usuario(usuario, caminho_arquivo)
+        resultado = await usuarioService.registrar_usuario(usuario, caminho_arquivo)
 
         os.remove(caminho_arquivo)
 
@@ -45,7 +45,7 @@ async def buscar_info_usuario_logado(Authorization: str = Header(default="")):
 
         payload = decodificar_token_jwt(token)
 
-        resultado = await buscar_usuario(payload["usuario_id"])
+        resultado = await usuarioService.buscar_usuario(payload["usuario_id"])
         if not resultado["status"] == 200:
             raise HTTPException(status_code=resultado['status'], detail=resultado)
         return resultado

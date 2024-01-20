@@ -38,3 +38,19 @@ async def buscar_info_usuario_logado(Authorization: str = Header(default="")):
 
     except:
         raise HTTPException(status_code=500['status'], detail='Erro interno no servidor')
+
+@router.get(
+    "/me",
+    response_description="Rota para buscar as postagens do usuario logado",
+    dependencies=[Depends(verificar_token)]
+)
+async def listar_postagens(Authorization: str = Header(default="")):
+    try:
+
+        return {
+            "teste": "Ok"
+        }
+
+
+    except:
+        raise HTTPException(status_code=500['status'], detail='Erro interno no servidor')

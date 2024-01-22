@@ -2,9 +2,12 @@
 from fastapi import FastAPI, Body
 from routes.UsuarioRoute import router as UsuarioRoute
 from routes.AutenticacaoRoute import router as AutenticacaoRoute
+from routes.PostagemRoutes import router as PostagemRoute
 app = FastAPI()
 app.include_router(UsuarioRoute, tags=["Usuario"], prefix="/api/usuario")
 app.include_router(AutenticacaoRoute, tags=["autenticacao"], prefix="/api/auth")
+app.include_router(PostagemRoute, tags=["postagem"], prefix="/api")
+
 
 
 @app.get("/", tags=["Health"])

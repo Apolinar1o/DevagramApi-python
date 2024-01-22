@@ -1,40 +1,48 @@
 from datetime import datetime
 import os
-
 from fastapi import APIRouter, HTTPException, Depends, Header, UploadFile
-
 from middleware.JwtMiddleWare import verificar_token
 from models.PostagemModel import PostagemCriarModel
+from services.AuthService import AuthService
+from services.UsuarioServices import UsuarioService
+from services.PostagemService import PostagemService
+
 
 router = APIRouter()
+authService = AuthService()
+usuarioService = UsuarioService()
+postagemService = PostagemService()
 
-@router.post("/", response_description="Rota para criar um novo post")
-async def rota_criar_postagem(file: UploadFile,  usuario: PostagemCriarModel = Depends(PostagemCriarModel)):
+
+@router.post("/postagem", response_description="Rota para criar um novo post", dependencies=[Depends(verificar_token)])
+async def rota_criar_postagem(postagem: PostagemCriarModel = Depends(PostagemCriarModel), Authorization: str = Header(default="")):
     try:
-        caminho_arquivo = f"files/foto-{datetime.now(). strftime("%H%M%S")}.png"
+        token = Authorization.split(" ")[1]
+        payload = authService.decodificar_token_jwt(token)
+        resultado = await(usuarioService.buscar_usuario(payload["usuario_id"]))
 
-        with open(caminho_arquivo, "wb+") as arquivo:
-            arquivo.write(file.file.read())
-        #resultado = await registrar_usuario(usuario, caminho_arquivo)
+        usuario_logado = resultado["dados"]
 
-        os.remove(caminho_arquivo)
+        resultado = await postagemService.cadastrar_postagem(postagem, usuario_logado["id"])
+        if not resultado["status"] == 201:
+            raise HTTPException(status_code=resultado["status"], detail=resultado["mensagem"])
 
+        return resultado
     except Exception as erro:
         raise erro
 
 
 @router.get(
-    "/",
+    "/postagem",
     response_description="Rota para buscar postagens do usuario logado",
     dependencies=[Depends(verificar_token)]
 )
-async def buscar_info_usuario_logado(Authorization: str = Header(default="")):
+async def buscar_info_usuario_logado():
     try:
+        resultado = await postagemService.listar_postagens()
 
-        return {
-            "teste": "Ok"
-        }
-
-
+        if not resultado["status"] == 200:
+            raise HTTPException(status_code=resultado["status"], detail=resultado["mensagem"])
+        return resultado
     except:
-        raise HTTPException(status_code=500['status'], detail='Erro interno no servidor')
+        raise HTTPException(status_code=500, detail='Erro interno no servidor')

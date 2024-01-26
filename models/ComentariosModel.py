@@ -1,8 +1,14 @@
 from pydantic import BaseModel, Field
 
-from models.usuarioModel import UsuarioModel
+from models.PostagemModel import decoratorUtil
 
 
-#class ComentarioModel(BaseModel):
-   # usuario: str = Field(...)
-    #comentario = str = Field(...)
+@decoratorUtil.form_body
+class ComentarioModel(BaseModel):
+    usuario: str = Field(...)
+    comentario: str = Field(...)
+
+
+@decoratorUtil.form_body
+class ComentarioCriarModel(BaseModel):
+    comentario: str = Field(...)

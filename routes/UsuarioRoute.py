@@ -57,6 +57,7 @@ async def buscar_info_usuario_logado(Authorization: str = Header(default=""), ):
 )
 async def atualizar_usuario_logado(Authorization: str = Header(default=""), usuario: UsuarioAtualizarModel = Depends(UsuarioAtualizarModel)):
     try:
+        print("!1111111111111111111111")
         token = Authorization.split(" ")[1]
 
         payload = authService.decodificar_token_jwt(token)

@@ -19,7 +19,7 @@ postagem_collection = database.get_collection("postagem")
 converterUtil = ConverterUtil()
 class PostagemRepository:
     async def criar_postagem (self, postagem: PostagemCriarModel, usuario_id) -> dict:
-        postagem_dict= {
+        postagem_dict = {
             "usuario_id": ObjectId(usuario_id),
             "legenda": postagem.legenda,
             "curtidas": [],
@@ -65,13 +65,18 @@ class PostagemRepository:
 
         if postagem:
             try:
+                if "comentario" in dados_postagem:
+                    dados_postagem["comentario"] = dados_postagem["comentario"].comentario
+
                 await postagem_collection.update_one(
                     {"_id": ObjectId(id)},
                     {"$set": dados_postagem}
                 )
+                print("11111111111111111111111")
                 postagem_atualizada = await postagem_collection.find_one({"_id": ObjectId(id)})
 
-                return converterUtil.postagem_helper(postagem_atualizada)
+                postagem_atualizada_serializavel = converterUtil.postagem_helper(postagem_atualizada)
+                return postagem_atualizada_serializavel
 
             except Exception as error:
                     print(error)

@@ -12,3 +12,7 @@ class ComentarioModel(BaseModel):
 @decoratorUtil.form_body
 class ComentarioCriarModel(BaseModel):
     comentario: str = Field(...)
+
+@decoratorUtil.form_body
+class ComentarioAtualizarModel(BaseModel):
+    comentario: str = Field(...)

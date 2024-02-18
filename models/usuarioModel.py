@@ -24,7 +24,7 @@ class UsuarioModel(BaseModel):
 
 @decoratorUtil.form_body
 class UsuarioCriarModel(BaseModel):
-    nome: str = Field(...)
+    nome: str = Field(max_length=8)
     email: EmailStr = Field(...)
     senha: str = Field(...)
 

@@ -6,7 +6,6 @@ from decouple import config
 
 from models.PostagemModel import PostagemCriarModel
 from models.usuarioModel import UsuarioModel, UsuarioCriarModel
-from utils.AuthUtil import gerar_senha_criptografada
 from utils.ConverterUtil import ConverterUtil
 
 MONGODB_URL=config("MONGODB_URL")
@@ -30,7 +29,7 @@ class PostagemRepository:
         postagem_criada = await postagem_collection.insert_one(postagem_dict)
 
         nova_postagem = await postagem_collection.find_one({"_id": postagem_criada.inserted_id})
-
+        print("nova_postagem: ", nova_postagem)
         return converterUtil.postagem_helper(nova_postagem)
     async def listar_postagens(self):
         postagens_encontradas = postagem_collection.aggregate([{
@@ -47,11 +46,34 @@ class PostagemRepository:
             postagens.append(converterUtil.postagem_helper(postagem))
 
         return postagens
-    async def buscar_postagem(self, id: str) -> dict:
+    async def listar_postagens_usuario(self, usuario_id):
+        postagens_encontradas = postagem_collection.aggregate([
+            {
+                "$match": {
+                    "usuario_id": ObjectId(usuario_id)
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "usuario",
+                    "localField": "usuario_id",
+                    "foreignField": "_id",
+                    "as": "usuario"
+                }
+            }
+        ])
+        postagens = []
+        async for postagem in postagens_encontradas:
+            postagens.append(converterUtil.postagem_helper(postagem))
+        return postagens
+    async def buscar_postagem(self, id: str) -> PostagemCriarModel:
         postagem = await postagem_collection.find_one({"_id": ObjectId(id)})
+        print("postagem: ", postagem)
 
         if(postagem):
             return converterUtil.postagem_helper(postagem)
+        else:
+            return []
 
     async def buscar_postagem_por_email(self, email: str) -> dict:
         print("buscar?")
@@ -72,7 +94,6 @@ class PostagemRepository:
                     {"_id": ObjectId(id)},
                     {"$set": dados_postagem}
                 )
-                print("11111111111111111111111")
                 postagem_atualizada = await postagem_collection.find_one({"_id": ObjectId(id)})
 
                 postagem_atualizada_serializavel = converterUtil.postagem_helper(postagem_atualizada)
@@ -83,6 +104,10 @@ class PostagemRepository:
 
     async def deletar_postagem(self, id: str):
         postagem = await postagem_collection.find_one({"_id": ObjectId(str(id))})
-
-        if( postagem):
+        if(postagem):
             await postagem_collection.delete_one({"_id": ObjectId(str(id))})
+    async def deletar_comentario(self, id: str, comentario_id: str):
+        postagem = await postagem_collection.find_one({"_id": ObjectId(str(id))})
+        print(postagem)
+        if(postagem):
+            await postagem_collection.delete_one({"comentario_id": ObjectId(str(comentario_id))})

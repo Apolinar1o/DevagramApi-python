@@ -3,10 +3,12 @@ import jwt
 from decouple import config
 from models.usuarioModel import UsuarioLoginModel
 from repositories.usuarioRepositore import UsuarioRepository
-from utils.AuthUtil import verificar_senha
-
+from services.UsuarioServices import UsuarioService
+from utils.AuthUtil import AuthUtil
 JWT_SECRET = config("JWT_SECRET")
 usuarioRepository = UsuarioRepository()
+usuarioService = UsuarioService()
+authUtil = AuthUtil()
 class AuthService:
     def gerar_token_jwt(self, usuario_id: str) -> str:
         payload ={
@@ -36,7 +38,7 @@ class AuthService:
                 "status": 401
             }
         else:
-            if verificar_senha(usuario.senha, usuario_encontrado['senha']):
+            if authUtil.verificar_senha(usuario.senha, usuario_encontrado['senha']):
 
                 return {
                     "mensagem": "Login realizado com sucesso",
@@ -48,3 +50,10 @@ class AuthService:
                     "mensagem": "email ou senha incorretos",
                     "status": 500
                 }
+    async def validar_usuario_logado(self, Authorization):
+        token = Authorization.split(" ")[1]
+
+        payload = self.decodificar_token_jwt(token)
+        resultado = await usuarioService.buscar_usuario(payload["usuario_id"])
+
+        return resultado

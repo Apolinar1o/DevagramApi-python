@@ -5,7 +5,7 @@ from models.usuarioModel import UsuarioLoginModel
 from repositories.usuarioRepositore import UsuarioRepository
 from services.UsuarioServices import UsuarioService
 from utils.AuthUtil import AuthUtil
-JWT_SECRET = config("JWT_SECRET")
+JWT_SECRET = config("jwt_secret")
 usuarioRepository = UsuarioRepository()
 usuarioService = UsuarioService()
 authUtil = AuthUtil()

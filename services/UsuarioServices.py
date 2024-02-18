@@ -22,21 +22,18 @@ class UsuarioService():
         try:
             usuario_encontrado = await UsuarioRepository.buscar_usuario_por_email(usuario.email)
             if(usuario_encontrado):
+                return ResponseDto(mensagem="Email ja cadastrado", dados="", status=201)
 
-                return {
-                    "mensagem": f"Email ja cadastrado no sistema",
-                    "status": 400
-                }
             else:
     
                 novo_usuario = await UsuarioRepository.criar_usuario(usuario)
-    
                 url_foto = awsProvider.upload_arquivo_s3(
                         f"fotos-perfil/{novo_usuario["id"]}.png",
                         caminho_foto)
                 novo_usuario = await UsuarioRepository.atualizar_usuario(novo_usuario["id"], {"foto": url_foto})
 
-                return ResponseDto(mensagem = "Usuario encontrado com sucesso", dados=novo_usuario, status = 201)
+
+                return ResponseDto(mensagem="Usuario encontrado com sucesso", dados=novo_usuario, status=201)
 
     
     

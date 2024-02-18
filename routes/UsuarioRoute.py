@@ -19,10 +19,12 @@ async def rota_criar_usuario(file: UploadFile,  usuario: UsuarioCriarModel = Dep
         with open(caminho_arquivo, "wb+") as arquivo:
             arquivo.write(file.file.read())
         resultado = await usuarioService.registrar_usuario(usuario, caminho_arquivo)
+        print("-------------------------------")
         os.remove(caminho_arquivo)
-        if not resultado["status"] == 201:
-            raise HTTPException(status_code=resultado["status"], detail=resultado["mensagem"])
-        print("----------------------")
+
+        if not resultado.status == 201:
+            raise HTTPException(status_code=resultado.status, detail=resultado.mensagem)
+        print("")
         return resultado.__dict__
     except Exception as erro:
         raise erro

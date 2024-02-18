@@ -8,7 +8,7 @@ from models.PostagemModel import PostagemCriarModel
 from models.usuarioModel import UsuarioModel, UsuarioCriarModel
 from utils.ConverterUtil import ConverterUtil
 
-MONGODB_URL=config("MONGODB_URL")
+MONGODB_URL=config("mongodb_url")
 
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_URL)
 

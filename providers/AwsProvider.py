@@ -7,8 +7,8 @@ class AWSProvider:
     def upload_arquivo_s3(self, caminho_para_salvar, caminho_do_arquivo, bucket="devaria-py"):
         s3_client = boto3.client(
             "s3",
-            aws_access_key_id=config("AWS_ACESS_KEY"),
-            aws_secret_access_key=config("AWS_SECRET_KEY")
+            aws_access_key_id=config("aws_acess_key"),
+            aws_secret_access_key=config("aws_secret_key")
         )
 
         try:

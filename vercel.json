@@ -1,0 +1,8 @@
+  "version": 2,
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/Main.py"
+    }
+  ]
+}

@@ -6,7 +6,7 @@ from routes.AutenticacaoRoute import router as AutenticacaoRoute
 from routes.PostagemRoutes import router as PostagemRoute
 
 origins = [
-    "*"
+    "*  "
 ]
 
 app = FastAPI()

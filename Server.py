@@ -1,4 +1,13 @@
 import uvicorn
+print("2222222222222222222222222222222")
+from decouple import config
 
 if __name__ == "__main__":
-    uvicorn.run("Main:app", host="0.0.0.0", port=5000, reload=True)
+    PORT = config("PORT")
+
+    if not PORT:
+        PORT = 5000
+
+    PORT = int(PORT)
+
+    uvicorn.run('Main:app', host="0.0.0.0", port=PORT, reload=True)
